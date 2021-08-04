@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Collections;
+using FilesType;
 
 
 namespace BitsArray
@@ -12,7 +13,7 @@ namespace BitsArray
 
     class Program
     {
-        static public Byte[] AfterChangefile(Byte[] arr, string messge)
+       /* static public Byte[] AfterChangefile(Byte[] arr, string messge)
         {
             /*
             for (int p = 60; p < 80; p++)
@@ -21,6 +22,7 @@ namespace BitsArray
             }
             Console.WriteLine("\n\n\n\n\n");
             */
+       /*
             int i = 0;
             BitArray ch = new BitArray(messge.Length * 32);
 
@@ -36,20 +38,22 @@ namespace BitsArray
                 }
             }
 
-            i = 50;
+            i = 8;
             BitArray char2 = new BitArray(new int[] { messge.Length }); // messge can be till 1024 chars
             for (int j = 0; i < 60; ++i, ++j)
             {
-                arr[i] = changeByte(arr[i], char2[j]);
+                arr[i] = changeByte(arr[i], false);
 
             }
 
-
+            i = 250;
             foreach (var a in ch)
             {
                 arr[i] = changeByte(arr[i], (bool)a);
                 i++;
             }
+            
+            Console.WriteLine("Hi1");
             /*
             for (int p = 60; p < 80; p++)
             {
@@ -57,6 +61,7 @@ namespace BitsArray
             }
             Console.WriteLine("\n\n\n\n\n");
             */
+       /*
             return arr;
         }
 
@@ -68,7 +73,7 @@ namespace BitsArray
             }
             Console.WriteLine("\n\n\n\n\n");
             */
-
+       /*
             BitArray char2 = new BitArray(10);
             int i = 50;
             int j = 0;
@@ -127,37 +132,32 @@ namespace BitsArray
             }
             return (Byte)bInt;
         }
-
+       */
         static void Main(string[] args)
-        { 
-        //{
-            Byte[] info = System.IO.File.ReadAllBytes("C:\\Users\\Didi\\Desktop\\DD.jpg");
-            DycripteTheMessge(info);
-            
-            if (info.GetType() == typeof(int))
-            /*
+        {
+            //{
+            //Byte[] info = System.IO.File.ReadAllBytes("C:\\Users\\Didi\\Desktop\\DD.jpg");
+            //DycripteTheMessge(info);
+
+            //if (info.GetType() == typeof(int))
+            Files file = new jpgFile();
             string FilePath = "C:\\Users\\Didi\\Desktop\\123.jpg";
             //            FileStream file = File.Open(FilePath, FileMode.Open);
             Byte[] info = System.IO.File.ReadAllBytes(FilePath);
 
-            for (int i =0;i<100;i++)
-            {
-                Console.WriteLine(info[i]);
-            }
-            Console.WriteLine("\n\n\n\n\n");
+            info = file.encryptInfoInFile(info, "Helorlo worolodo!o!");
+
+            File.WriteAllBytes("C:\\Users\\Didi\\Desktop\\DD.jpg", info);
 
 
-            info = AfterChangefile(info, "Hello World im the knog of the world. DDDDDDD");
-
-            DycripteTheMessge(info);
-
+            file.decryptInfoFromFile(info);
+            /*
             for (int i = 0; i < 100; i++)
             {
                 Console.WriteLine(info[i]);
             }
             Console.WriteLine("\n\n\n\n\n");
 
-            File.WriteAllBytes("C:\\Users\\Didi\\Desktop\\DD.jpg", info);
             */
             Console.ReadLine();
         }
