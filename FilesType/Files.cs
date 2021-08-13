@@ -36,6 +36,8 @@ namespace FilesType
         /// <returns>the message as Byte array</returns>
         public abstract Tuple<Byte[],string> decryptInfoFromFile(Byte[] arr);
 
+        public abstract string maxMessageSize(Byte[] arr);
+        public abstract string getStringFromData(byte[] Data, int Length);
         public Byte changeByte(Byte b, bool bit)
         {
             int bInt = int.Parse(b.ToString());
@@ -54,11 +56,13 @@ namespace FilesType
 
         public bool[] findFileType(string type)
         {
-            bool[] arr =null; 
+            bool[] arr = new bool[] { false, false, false, false }; 
             if (type.ToLower() == "string")
                 arr =  new bool[] { true, true, true, true };
             else if(type.ToLower() == "png")
                 arr = new bool[] { true, true, true, false };
+            else if(type.ToLower() == "txt")
+                arr = new bool[] { true, true, false, true };
             return arr;
         }
 
@@ -72,10 +76,15 @@ namespace FilesType
         public string getTypeData(bool[] typeData)
         {
             string str = "";
-            if (Enumerable.SequenceEqual(typeData,new bool[] { true, true, true, true }))
+            if (Enumerable.SequenceEqual(typeData, new bool[] { true, true, true, true }))
                 str = "string";
             else if (Enumerable.SequenceEqual(typeData, new bool[] { true, true, true, false }))
                 str = "png";
+            else if (Enumerable.SequenceEqual(typeData, new bool[] { true, true, false, true }))
+                str = "txt";
+            else if ((Enumerable.SequenceEqual(typeData, new bool[] { false, false, false, false })))
+                throw new Exception("File Type Not Suported");
+            
             return str;
         }
     }

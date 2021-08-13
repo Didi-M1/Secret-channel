@@ -24,7 +24,7 @@ namespace FilesType
      */
     public class jpgFile : Files
     {
-        const int startFileByte = 8;
+        const int startFileByte = 150;
         public override Tuple<Byte[], string> decryptInfoFromFile(byte[] fileByteArray)
         {
             int fileLociton = startFileByte; //after all the Haders
@@ -34,42 +34,62 @@ namespace FilesType
 
             string type = decryptTypeDataFromFile(fileByteArray, ref fileLociton);
 
-            byte[] Data = decryptDataFromFile(fileByteArray, Length, ref fileLociton);
 
-            if(type =="string")
+            byte[] Data;
+            if (type =="string")
             {
-                string str = "";
-                BitArray[] DataIn32Bits = new BitArray[Length/32];
-                byte[] arr = new byte[4];
-                for(int i =0,j=0;i<(Length/8);i+=4,j++)
-                {
-                    arr[3] = Data[i + 3];
-                    arr[2] = Data[i + 2];
-                    arr[1] = Data[i + 1];
-                    arr[0] = Data[i];
-                    DataIn32Bits[j] = new BitArray(arr);
-                    foreach(var b in DataIn32Bits[j])
-                    {
-                        Console.WriteLine(b);
-                    }
-                    Console.WriteLine("\n\n\n\n\n\n\n");
-                }
 
-                int[] convertHelper = new int[1];
-
-                foreach (var item in DataIn32Bits)
-                {
-                    item.CopyTo(convertHelper, 0);
-                    str += (char)convertHelper[0];
-                }
-                str += "\n";
-                Console.WriteLine(str);
+                Data = decryptstringFromFile(fileByteArray, Length, ref fileLociton);
+                string str = getStringFromData(Data,Length);  
             }
+            else
+                Data = decryptDataFromFile(fileByteArray, Length, ref fileLociton);
 
             return new Tuple<byte[], string>(Data, type);
         }
 
         private byte[] decryptDataFromFile(byte[] fileByteArray, int length, ref int fileLociton)
+        {
+            BitArray Data = new BitArray(8);
+            byte[] DataByte = new byte[length];
+            for (int i = 0; i < length*8; i++, fileLociton++)
+            {
+                if (i % 8 == 0 && i != 0)
+                    DataByte[(i / 8) - 1] = ConvertToByte(Data);
+                Data[i % 8] = GetChangedBit(fileByteArray[fileLociton]);
+
+            }
+
+            return DataByte;
+        }
+
+        
+        public override string getStringFromData(byte[] Data, int Length)
+        {
+            string str = "";
+            BitArray[] DataIn32Bits = new BitArray[Length / 32];
+            byte[] arr = new byte[4];
+            for (int i = 0, j = 0; i < (Length / 8); i += 4, j++)
+            {
+                arr[3] = Data[i + 3];
+                arr[2] = Data[i + 2];
+                arr[1] = Data[i + 1];
+                arr[0] = Data[i];
+                DataIn32Bits[j] = new BitArray(arr);
+            }
+
+            int[] convertHelper = new int[1];
+
+            foreach (var item in DataIn32Bits)
+            {
+                item.CopyTo(convertHelper, 0);
+                str += (char)convertHelper[0];
+            }
+            str += "\n";
+            return str;
+        }
+
+        private byte[] decryptstringFromFile(byte[] fileByteArray, int length, ref int fileLociton)
         {
 
             BitArray Data = new BitArray(8);
@@ -77,7 +97,7 @@ namespace FilesType
             for (int i=0; i < length; i++,fileLociton++)
             {
                 if (i % 8 == 0 && i!=0)
-                    DataByte[i / 8] = ConvertToByte(Data);
+                    DataByte[(i / 8)-1] = ConvertToByte(Data);
                 Data[i%8] = GetChangedBit(fileByteArray[fileLociton]); 
                 
             }
@@ -91,14 +111,22 @@ namespace FilesType
             {
                 throw new ArgumentException("bits");
             }
+            for (int i = 0; i < 4; ++i)
+            {
+                bool temp = bits[i];
+                bits[i] = bits[7 - i];
+                bits[7 - i] = temp;
+            }
             byte[] bytes = new byte[1];
             bits.CopyTo(bytes, 0);
             return bytes[0];
         }
+
+
         private string decryptTypeDataFromFile(byte[] fileByteArray, ref int fileLociton)
         {
             bool[] typeData = { true, true, true, true };
-            for (int i = 0; i < 4; ++i)
+            for (int i = 0; i < 4; ++i, fileLociton++)
             {
                 typeData[i] = GetChangedBit(fileByteArray[fileLociton]);
             }
@@ -134,7 +162,6 @@ namespace FilesType
             // messge can be till 16777216 bits
             // 2097152 Byte, 2048 mb ~ 2Gb
 
-
             BitArray lengthOfMessage = new BitArray(new int[] { message.Length*32 }); // the Length of the message in bitArray
          //   if (lengthOfMessage.Length > 24)
            //     throw new Exception("Message too big");
@@ -160,9 +187,7 @@ namespace FilesType
                     fileByteArray[fileLociton] = changeByte(fileByteArray[fileLociton], (bool)a);
                     fileLociton++;
 
-                    Console.WriteLine(a);
                 }
-                Console.WriteLine("\n\n\n\n\n\n\n");
 
             }
             return fileByteArray;
@@ -180,10 +205,9 @@ namespace FilesType
 
             // messge can be till 16777216 bits
             // 2097152 Byte, 2048 mb ~ 2Gb
-            int MessageLengthInByte = message.Length * 32;//every char is 32 bits
             BitArray lengthOfMessage = new BitArray(new int[] { message.Length }); // the Length of the message in bitArray
-            if (lengthOfMessage.Length > 24)
-                throw new Exception("Message too big");
+            //if (lengthOfMessage.Length > 24)
+              //  throw new Exception("Message too big");
 
             int fileLociton = startFileByte; //after all the Haders
 
@@ -199,12 +223,48 @@ namespace FilesType
 
             foreach (byte b in message)
             {
-                    fileByteArray[fileLociton] = changeByte(fileByteArray[fileLociton], bool.Parse(b.ToString()));
+                BitArray Byte = ByteToBitFormat8(b);
+                for (int i =0;i<8;++i)
+                {
+
+                    fileByteArray[fileLociton] = changeByte(fileByteArray[fileLociton], Byte[i]);
                     fileLociton++;
+                }
             }
             return fileByteArray;
         }
 
-        
+        private BitArray ByteToBitFormat8(byte b)
+        {
+            BitArray Byte = new BitArray(8);
+            int num = int.Parse(b.ToString());
+            int counter = 128;
+            
+            for (int i = 0; i < 8 ; i++)
+            {
+                if (num >= counter)
+                {
+                    Byte[i] = true;
+                    num -= counter;
+                }
+                else
+                    Byte[i] = false;
+
+                counter /= 2;
+
+            }
+            return Byte;
+        }
+
+        public override string maxMessageSize(byte[] arr)
+        {
+            int numBits = arr.Length / 8;
+            numBits -=(startFileByte + 24 + 4);
+            return (numBits ).ToString()+" Byte";
+        }
+        public override string ToString()
+        {
+            return "file.jpg/jpag";
+        }
     }
 }

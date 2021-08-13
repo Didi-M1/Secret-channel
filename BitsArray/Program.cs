@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Collections;
 using FilesType;
-
+using System.Drawing;
 
 namespace BitsArray
 {
@@ -141,16 +141,21 @@ namespace BitsArray
 
             //if (info.GetType() == typeof(int))
             Files file = new jpgFile();
-            string FilePath = "C:\\Users\\Didi\\Desktop\\123.jpg";
+            string FilePath = "C:\\Users\\Didi\\Desktop\\HelloWorldpng.png";
+            Bitmap bitmap = new Bitmap(FilePath);
+            
             //            FileStream file = File.Open(FilePath, FileMode.Open);
             Byte[] info = System.IO.File.ReadAllBytes(FilePath);
+            Console.WriteLine( file.maxMessageSize(info));
 
-            info = file.encryptInfoInFile(info, "Helorlo worolodo!o!");
+            Byte[] msg = System.IO.File.ReadAllBytes("C:\\Users\\Didi\\Desktop\\Help.txt");
+            info = file.encryptInfoInFile(info, msg,"txt");
 
-            File.WriteAllBytes("C:\\Users\\Didi\\Desktop\\DD.jpg", info);
+            File.WriteAllBytes(FilePath, info);
 
 
-            file.decryptInfoFromFile(info);
+          //  Tuple<byte[],string> infoFromFile =file.decryptInfoFromFile(info);
+         //   File.WriteAllBytes("C:\\Users\\Didi\\Desktop\\temp."+infoFromFile.Item2, infoFromFile.Item1);
             /*
             for (int i = 0; i < 100; i++)
             {
