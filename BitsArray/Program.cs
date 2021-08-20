@@ -18,13 +18,13 @@ namespace BitsArray
         static void Main(string[] args)
         {
             image image = new image();
-            string FilePath = "C:\\Users\\Didi\\Desktop\\HelloWorldpng.png";
-            Bitmap bitmap = new Bitmap(FilePath);
+           // string FilePath = "C:\\Users\\Didi\\Desktop\\HelloWorldpng.png";
+            //Bitmap bitmap = new Bitmap(FilePath);
 
-            Byte[] msg = File.ReadAllBytes("C:\\Users\\Didi\\Desktop\\Help.txt");
-            Bitmap ChangedImage = image.encryptImage(bitmap, msg, "txt");
+            //Byte[] msg = File.ReadAllBytes("C:\\Users\\Didi\\Desktop\\Help.txt");
+           // Bitmap ChangedImage = image.encryptImage(bitmap, msg, "txt");
 
-            ChangedImage.Save("C:\\Users\\Didi\\Desktop\\file.png", ImageFormat.Png);
+            //ChangedImage.Save("C:\\Users\\Didi\\Desktop\\file.png", ImageFormat.Png);
             Tuple<byte[], string> info = image.decryptInfoFromFile("C:\\Users\\Didi\\Desktop\\file.png");
 
             File.WriteAllBytes("C:\\Users\\Didi\\Desktop\\Help123." + info.Item2, info.Item1);

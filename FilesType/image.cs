@@ -26,9 +26,9 @@ namespace FilesType
     {
         int LengthMsg = 32;
         int sizeOfType = 8;
-        public  Bitmap encryptImage(Bitmap bitmap, Byte[] info,string type)
+        public Bitmap encryptImage(string filename, Byte[] info,string type)
         {
-
+            Bitmap bitmap = new Bitmap(filename);
             bitmap.MakeTransparent();
             ReversTransperntImg(ref bitmap);
             int i = 0;
@@ -96,6 +96,20 @@ namespace FilesType
 
         }
 
+        public string maxMessageSize(string filename)
+        {
+            return maxMessageSizeNumber(filename).ToString() + "B";
+        }
+
+        public int maxMessageSizeNumber(string filename)
+        {
+            Bitmap img = new Bitmap(filename);
+
+            int w = img.Width;
+            int h = img.Height;
+             return ((w * h - 10) * 4);
+        }
+
         private bool[] convertBitArrayToBool(BitArray typeInBits)
         {
             bool[] arr = new bool[8];
@@ -138,12 +152,14 @@ namespace FilesType
                         break;
                     Color color = img.GetPixel(i, j);
                     getsBitsFromImg(ref helperToGetData, color);
-                    putBitsInArr(ref MsgInBits, helperToGetData, j*4 + (i * Height)- previusOfPosionInImg);
+                    putBitsInArr(ref MsgInBits, helperToGetData, j*4 + (i * Height*4)- previusOfPosionInImg);
                     posionInImg += 4;
 
                 }
                 if (previusOfPosionInImg + lengthMsg <= posionInImg)
                     break;
+                else
+                    j = 0;
             }
             return MsgInBits;
         }
@@ -184,13 +200,14 @@ namespace FilesType
                     Color color = bitmap.GetPixel(i, j);
                     color = ChangeArgbToInfo(color, HelpBitArrayToChange);
                     bitmap.SetPixel(i, j, color);
-                    Color color1 = bitmap.GetPixel(i, j);
-
+                    
 
                     posionInInfo += 4;
                 }
                 if (LengthOfData <= posionInInfo)
                     break;
+                else
+                    j = 0;
             }
         }
 

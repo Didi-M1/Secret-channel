@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,11 +25,13 @@ namespace display
     /// </summary>
     public partial class MainWindow : Window
     {
-        Files file;
+        bool toSave = false;
+        Bitmap imgMsg;
+        image file;
         string filename;
         public MainWindow()
         {
-           // file = new image();
+            file = new image();
             InitializeComponent();
         }
 
@@ -76,18 +81,9 @@ namespace display
 
         private void decryptFileBtn_Click(object sender, RoutedEventArgs e)
         {
-            Byte[] info = System.IO.File.ReadAllBytes(filename);
-
-            Tuple<byte[], string> infoFromFile = file.decryptInfoFromFile(info);
-            if (infoFromFile.Item2 == "string")
-            {
-                msgTextBlock.Text = file.getStringFromData(infoFromFile.Item1, infoFromFile.Item1.Length * 8);
-                msgTextBlock.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                saveFile(infoFromFile);
-            }
+            choosFileBtn_Click(sender,e);
+            Tuple<byte[], string> infoFromFile = file.decryptInfoFromFile(filename);
+            saveFile(infoFromFile);
         }
 
         private void saveFile(Tuple<byte[], string> infoFromFile)
@@ -96,21 +92,93 @@ namespace display
             if (saveFileDialog.ShowDialog() == true)
                 System.IO.File.WriteAllBytes(saveFileDialog.FileName +"."+ infoFromFile.Item2, infoFromFile.Item1);
         }
-    
+
+        private void saveFile(Bitmap image)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            if (saveFileDialog.ShowDialog() == true)
+                image.Save(saveFileDialog.FileName + ".png", ImageFormat.Png);
+        }
 
         private void encryptFileBtn_Click(object sender, RoutedEventArgs e)
         {
-            Byte[] info = System.IO.File.ReadAllBytes(filename);
-            MessageBox.Show("Be awar, this is the mac size of the encrypt msg: " + file.maxMessageSize(info));
+            MessageBox.Show("Be awar, this is the max size of the encrypt msg: " + file.maxMessageSize(filename));
 
             string Msgfilename = OpenFile();
             Byte[] msg = System.IO.File.ReadAllBytes(Msgfilename);
+            if (msg.Length > file.maxMessageSizeNumber(filename))
+            {
+                MessageBox.Show("sorry. msg too big.");
+                return;
+            }
             string[] arr = Msgfilename.Split('.');
-            bool Flag = true;
-            Byte[] infoAfterChange = file.encryptInfoInFile(info, msg, arr[arr.Length-1]);
-            //new Window1(info, infoAfterChange,Flag).Show();
-            //    if(Flag)
-            System.IO.File.WriteAllBytes(filename, infoAfterChange);
+
+            imgMsg = file.encryptImage(filename, msg, arr[arr.Length-1]);
+            imgMsg.Save(".\\temp");
+            Bitmap bitmap = new Bitmap(filename);
+
+            Image1.Source = ConvertToImageSorce(bitmap);
+            Image2.Source = ConvertToImageSorce(imgMsg);
+            Image1.Visibility = Visibility.Visible;
+            Image2.Visibility = Visibility.Visible;
+            TextBlockAfter.Visibility = Visibility.Visible;
+            TextBlockBefor.Visibility = Visibility.Visible;
+            TextBlockBefor.Text += " -size:" +new FileInfo(filename).Length.ToString()+"B";
+            TextBlockAfter.Text += " -size:" + new FileInfo(".\\temp").Length.ToString() + "B";
+
+            cencelButton.Visibility = Visibility.Visible;
+            saveButton.Visibility = Visibility.Visible;
+            encryptFileBtn.Visibility = Visibility.Hidden;
+            decryptFileBtn.Visibility = Visibility.Hidden;
+            FileNameTextBlock.Visibility = Visibility.Hidden;
+
+        }
+        public BitmapImage ConvertToImageSorce(Bitmap src)
+        {
+            MemoryStream ms = new MemoryStream();
+            ((System.Drawing.Bitmap)src).Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
+            BitmapImage image = new BitmapImage();
+            image.BeginInit();
+            ms.Seek(0, SeekOrigin.Begin);
+            image.StreamSource = ms;
+            image.EndInit();
+            return image;
+        }
+
+        private void saveButton_Click(object sender, RoutedEventArgs e)
+        {
+            saveFile(imgMsg);
+
+            Image1.Visibility = Visibility.Hidden;
+            Image2.Visibility = Visibility.Hidden;
+            TextBlockAfter.Visibility = Visibility.Hidden;
+            TextBlockBefor.Visibility = Visibility.Hidden;
+            saveButton.Visibility = Visibility.Hidden;
+            TextBlockBefor.Text ="Befor";
+            TextBlockAfter.Text = "After";
+
+
+            encryptFileBtn.Visibility = Visibility.Visible;
+            decryptFileBtn.Visibility = Visibility.Visible;
+            FileNameTextBlock.Visibility = Visibility.Visible;
+
+        }
+
+        private void cencelButton_Click(object sender, RoutedEventArgs e)
+        {
+            Image1.Visibility = Visibility.Hidden;
+            Image2.Visibility = Visibility.Hidden;
+            TextBlockAfter.Visibility = Visibility.Hidden;
+            TextBlockBefor.Visibility = Visibility.Hidden;
+            cencelButton.Visibility = Visibility.Hidden;
+            saveButton.Visibility = Visibility.Hidden;
+            TextBlockBefor.Text = "Befor";
+            TextBlockAfter.Text = "After";
+
+
+            encryptFileBtn.Visibility = Visibility.Visible;
+            decryptFileBtn.Visibility = Visibility.Visible;
+            FileNameTextBlock.Visibility = Visibility.Visible;
 
         }
     }

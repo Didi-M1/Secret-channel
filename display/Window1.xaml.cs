@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,9 +21,18 @@ namespace display
     /// </summary>
     public partial class Window1 : Window
     {
+        public bool a()
+        {
+            return true;
+        }
         public Window1()
         {
             InitializeComponent();
+        }
+        public Window1(string filename,Bitmap img)
+        {
+            InitializeComponent();
+
         }
 
         public Window1(byte[] info, byte[] infoAfterChange, bool flag)
@@ -30,10 +41,11 @@ namespace display
             InfoAfterChange = infoAfterChange;
             Flag = flag;
             
-            Image1.Source = new BitmapImage(new Uri(System.Environment.CurrentDirectory + "Debugtemp1.jpg"));
-            Image2.Source = new BitmapImage(new Uri(System.Environment.CurrentDirectory + "Debugtemp2.jpg"));
+           // Image1.Source = new BitmapImage(new Uri(System.Environment.CurrentDirectory + "Debugtemp1.jpg"));
+           // Image2.Source = new BitmapImage(new Uri(System.Environment.CurrentDirectory + "Debugtemp2.jpg"));
 
         }
+        
 
         public byte[] Info { get; }
         public byte[] InfoAfterChange { get; }

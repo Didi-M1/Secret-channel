@@ -7,11 +7,18 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
+        <TextBlock x:Name="TextBlockAfter" HorizontalAlignment="Left" Visibility="Hidden" TextWrapping="Wrap" Text="After" VerticalAlignment="Top" Margin="546,314,0,0" Height="30" Width="63" FontSize="25"/>
+        <TextBlock x:Name="TextBlockBefor" HorizontalAlignment="Left" Visibility="Hidden" TextWrapping="Wrap" Text="Before" VerticalAlignment="Top" Margin="213,317,0,0" FontSize="25"/>
+        <Image x:Name="Image1" Visibility="Hidden" HorizontalAlignment="Left" Height="269" VerticalAlignment="Top" Width="289" Margin="436,23,0,0"/>
+        <Image x:Name="Image2" Visibility="Hidden" HorizontalAlignment="Left" Height="269" VerticalAlignment="Top" Width="288" Margin="100,23,0,0" RenderTransformOrigin="0.491,0.495"/>
+
         <Button Visibility="Hidden" x:Name="choosMsgFileBtn" Content="choos file" HorizontalAlignment="Left" Margin="300,55,0,0" VerticalAlignment="Top" Width="184" Click="choosFileBtn_Click" Height="62"/>
         <Button x:Name="choosFileBtn" Content="choos file" HorizontalAlignment="Left" Margin="300,55,0,0" VerticalAlignment="Top" Width="184" Click="choosFileBtn_Click" Height="62"/>
         <TextBlock Visibility="Hidden" x:Name="FileNameTextBlock" HorizontalAlignment="Left" Height="41" Margin="75,238,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="662"/>
         <Button x:Name="encryptFileBtn" Visibility="Hidden" Content="encrypt Info In File" HorizontalAlignment="Left" VerticalAlignment="Top" Width="183" Margin="75,155,0,0" Height="62" Click="encryptFileBtn_Click"/>
         <Button x:Name="decryptFileBtn" Visibility="Hidden" Content="decrypt In fo From File" HorizontalAlignment="Left" VerticalAlignment="Top" Width="183" Margin="554,155,0,0" Height="62" Click="decryptFileBtn_Click"/>
         <TextBlock Visibility="Hidden" x:Name="msgTextBlock" HorizontalAlignment="Left" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Margin="3,284,0,0" Height="110" Width="779"/>
+        <Button Visibility="Hidden" x:Name="saveButton" Content="save" HorizontalAlignment="Left" Margin="621,364,0,0" VerticalAlignment="Top" Width="161" Height="45" Click="saveButton_Click"/>
+        <Button Visibility="Hidden" x:Name="cencelButton" Content="cencel" HorizontalAlignment="Left" Margin="10,359,0,0" VerticalAlignment="Top" Width="148" Height="50" Click="cencelButton_Click"/>
     </Grid>
 </Window>

@@ -7,10 +7,6 @@
         mc:Ignorable="d"
         Title="Window1" Height="450" Width="800">
     <Grid>
-        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="After" VerticalAlignment="Top" Margin="546,314,0,0" Height="30" Width="63" FontSize="25"/>
-        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Before" VerticalAlignment="Top" Margin="213,317,0,0" FontSize="25"/>
-        <Image x:Name="Image1" HorizontalAlignment="Left" Height="269" VerticalAlignment="Top" Width="289" Margin="436,23,0,0"/>
-        <Image x:Name="Image2" HorizontalAlignment="Left" Height="269" VerticalAlignment="Top" Width="288" Margin="100,23,0,0" RenderTransformOrigin="0.491,0.495"/>
 
     </Grid>
 </Window>
