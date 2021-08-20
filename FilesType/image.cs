@@ -22,7 +22,7 @@ namespace FilesType
     BYTE XThumbnail;      /* 0Eh  Horizontal Pixel Count    
     BYTE YThumbnail;      /* 0Fh  Vertical Pixel Count      
      */
-    public class jpgFile : Files
+    public class image : Files
     {
         const int startFileByte = 150;
         public override Tuple<Byte[], string> decryptInfoFromFile(byte[] fileByteArray)
