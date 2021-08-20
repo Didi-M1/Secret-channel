@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,15 +19,6 @@ namespace FilesType
         /// <param name="type">the message type</param>
         /// <returns>return the file after the message in it</returns>
         public abstract Byte[] encryptInfoInFile(Byte[] arr, Byte[] message,string type);
-
-        /// <summary>
-        /// encryptInfoInFile function - taks the file as Byte array, also take the message as stirng
-        /// and encrypt the message into copy file and return the copy after the change.
-        /// </summary>
-        /// <param name="arr">Main file</param>
-        /// <param name="message">our message as string</param>
-        /// <returns>return the file after the message in it</returns>
-        public abstract Byte[] encryptInfoInFile(Byte[] arr, string message);
 
 
         /// <summary>
@@ -65,6 +58,7 @@ namespace FilesType
                 arr = new bool[] { true, true, false, true };
             return arr;
         }
+        
 
         public bool GetChangedBit(byte b)
         {

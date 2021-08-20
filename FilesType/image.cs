@@ -1,270 +1,276 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace FilesType
 {
-
-    /*
-     * 
-     * jpg / JPEG / JFIFH -- file format
-    BYTE SOI[2];          /* 00h  Start of Image Marker     
-    BYTE APP0[2];         /* 02h  Application Use Marker    
-    BYTE Length[2];       /* 04h  Length of APP0 Field      
-    BYTE Identifier[5];   /* 06h  "JFIF" (zero terminated) Id String 
-    BYTE Version[2];      /* 07h  JFIF Format Revision      
-    BYTE Units;           /* 09h  Units used for Resolution 
-    BYTE Xdensity[2];     /* 0Ah  Horizontal Resolution     
-    BYTE Ydensity[2];     /* 0Ch  Vertical Resolution       
-    BYTE XThumbnail;      /* 0Eh  Horizontal Pixel Count    
-    BYTE YThumbnail;      /* 0Fh  Vertical Pixel Count      
+    /**
+     *
+     Work description:
+     
+     *Step one - transfer the image to bitMap format.
+     *
+     *Step two - Make sure there is an alpha channel to the img with the makeTransparnt function.
+     *
+     *Step three - Change the lsb of the ARGB per pixel and save information 
+     *from our message in the following order - size (32b), file type (8b) and then the message.
+     *
+     *Step four - Do everything revers and decrypt the message from our bitMap. 
      */
-    public class image : Files
+
+    public class image
     {
-        const int startFileByte = 150;
-        public override Tuple<Byte[], string> decryptInfoFromFile(byte[] fileByteArray)
+        int LengthMsg = 32;
+        int sizeOfType = 8;
+        public  Bitmap encryptImage(Bitmap bitmap, Byte[] info,string type)
         {
-            int fileLociton = startFileByte; //after all the Haders
+
+            bitmap.MakeTransparent();
+            ReversTransperntImg(ref bitmap);
+            int i = 0;
+            int j = 0;
 
 
-            int Length = decryptLengthFromFile(fileByteArray, ref fileLociton);
+            BitArray bitsInfo = new BitArray(info);
 
-            string type = decryptTypeDataFromFile(fileByteArray, ref fileLociton);
+            BitArray lengthOfMessage = new BitArray(new int[] { info.Length }); // the Length of the message in bitArray
+
+            BitArray typeBitArray = putTypeOFMsgInBit(type); // the type of the message in bitArray
+             
 
 
-            byte[] Data;
-            if (type =="string")
+
+            int length = bitsInfo.Length;
+
+
+            ChangeImageFromInfo(ref i, ref j, 0, ref bitmap, lengthOfMessage, LengthMsg);
+
+            ChangeImageFromInfo(ref i, ref j, 0, ref bitmap, typeBitArray, sizeOfType);
+
+            ChangeImageFromInfo(ref i, ref j, 0, ref bitmap, bitsInfo, length);
+
+            return bitmap;
+        }
+
+        private BitArray putTypeOFMsgInBit(string type)
+        {
+            bool[] arr;
+            if (type == "png")
+                arr = new bool[] { true, true, true, true, true, true, true, true };
+            else if (type == "txt")
+                arr = new bool[] { true, true, true, true, true, true, true, false };
+            else
+                arr = new bool[] { false, false, false, false, false, false, false, false };
+            return convertBoolToBitArray(arr);
+        }
+
+        public Tuple<byte[], string> decryptInfoFromFile(string filePath)
+        {
+            Bitmap img = new Bitmap(filePath);
+
+            int i = 0, j = 0;
+            int posionInImg = 0;
+
+            BitArray LengthOfMsgInBits = getChangesBitFromImg(img, ref i, ref j,ref posionInImg, LengthMsg);
+            int[] convertHelper = new int[1];
+            LengthOfMsgInBits.CopyTo(convertHelper, 0);
+            int exsratLengthMsg = convertHelper[0] * 8;
+
+
+            BitArray typeInBits = getChangesBitFromImg(img, ref i, ref j, ref posionInImg, sizeOfType);
+            bool[] boolArrType = convertBitArrayToBool(typeInBits);
+            string type = getType(boolArrType);
+
+
+
+            BitArray MsgInBits = getChangesBitFromImg(img, ref i, ref j, ref posionInImg, exsratLengthMsg);
+            byte[] dataInByteArr = getDataFromBitArray(MsgInBits);
+
+
+
+            return new Tuple<byte[], string>(dataInByteArr, type);
+
+        }
+
+        private bool[] convertBitArrayToBool(BitArray typeInBits)
+        {
+            bool[] arr = new bool[8];
+            for (int i = 0; i < 8; ++i)
+                arr[i] = typeInBits[i];
+            return arr;
+        }
+        private BitArray convertBoolToBitArray(bool[] typeInbool)
+        {
+            BitArray typeInBits = new BitArray(sizeOfType);
+            for (int i = 0; i < 8; ++i)
+                typeInBits[i] = typeInbool[i];
+            return typeInBits;
+        }
+
+        private string getType(bool[] typeInBits)
+        {
+
+            string str = "";
+            if (Enumerable.SequenceEqual(typeInBits, new bool[] { true, true, true, true, true, true, true, true }))
+                str = "png";
+            else if (Enumerable.SequenceEqual(typeInBits, new bool[] { true, true, true, true, true, true, true, false }))
+                str = "txt";
+            else if ((Enumerable.SequenceEqual(typeInBits, new bool[] { false, false, false, false, false, false, false, false })))
+                throw new Exception("File Type Not Suported");
+            
+            return str;        }
+
+        private BitArray getChangesBitFromImg(Bitmap img,ref int i,ref int j, ref int posionInImg, int lengthMsg)
+        {
+            BitArray helperToGetData = new BitArray(4);
+            BitArray MsgInBits = new BitArray(lengthMsg);
+            int Width = img.Width, Height = img.Height;
+            int previusOfPosionInImg = posionInImg;
+            for (; i < Width; ++i)
             {
+                for (; j < Height; ++j)
+                {
+                    if (previusOfPosionInImg+ lengthMsg <= posionInImg)
+                        break;
+                    Color color = img.GetPixel(i, j);
+                    getsBitsFromImg(ref helperToGetData, color);
+                    putBitsInArr(ref MsgInBits, helperToGetData, j*4 + (i * Height)- previusOfPosionInImg);
+                    posionInImg += 4;
 
-                Data = decryptstringFromFile(fileByteArray, Length, ref fileLociton);
-                string str = getStringFromData(Data,Length);  
+                }
+                if (previusOfPosionInImg + lengthMsg <= posionInImg)
+                    break;
+            }
+            return MsgInBits;
+        }
+
+        private static void ConvertTo8Bit(BitArray msgInBits, ref BitArray convertHelper, int i)
+        {
+            for(int j =0;j<8;++j)
+                convertHelper[j] = msgInBits[(i * 8) + j];
+        }
+        private static void putBitsInArr(ref BitArray lengthOfMsgInBits, BitArray helperToGetData, int i)
+        {
+            for(int j=0;j<4;++j)
+                lengthOfMsgInBits[(i)+j] = helperToGetData[j];
+        }
+        private static void getsBitsFromINfo(ref BitArray helpBitArrayToChange, BitArray bitsInfo, int posionInInfo)
+        {
+            for (int j = 0; j < 4; ++j)
+            {
+                helpBitArrayToChange[j] = bitsInfo[posionInInfo + j];
+            }
+        }
+
+
+        private static void ChangeImageFromInfo(ref int i, ref int j, int posionInInfo, ref Bitmap bitmap, BitArray lengthOfMessage, int LengthOfData)
+        {
+            BitArray HelpBitArrayToChange = new BitArray(4);
+            int Width = bitmap.Width;
+            int Height = bitmap.Height;
+
+            for (; i < Width; ++i)
+            {
+                for (; j < Height; ++j)
+                {
+                    if (LengthOfData <= posionInInfo)
+                        break;
+                    getsBitsFromINfo(ref HelpBitArrayToChange, lengthOfMessage, posionInInfo);
+
+                    Color color = bitmap.GetPixel(i, j);
+                    color = ChangeArgbToInfo(color, HelpBitArrayToChange);
+                    bitmap.SetPixel(i, j, color);
+                    Color color1 = bitmap.GetPixel(i, j);
+
+
+                    posionInInfo += 4;
+                }
+                if (LengthOfData <= posionInInfo)
+                    break;
+            }
+        }
+
+
+        private static Color ChangeArgbToInfo(Color color, BitArray bitsArrayInfo)
+        {
+            int alfa = color.A;
+            int red = color.R;
+            int blue = color.B;
+            int green = color.G;
+            ChangeColor(ref alfa, bitsArrayInfo[0]);
+            ChangeColor(ref red, bitsArrayInfo[1]);
+            ChangeColor(ref blue, bitsArrayInfo[2]);
+            ChangeColor(ref green, bitsArrayInfo[3]);
+
+            return Color.FromArgb(alfa, red, green, blue);
+        }
+
+        private static void ChangeColor(ref int num, bool v)
+        {
+            if (v)
+            {
+                if (num % 2 == 0)
+                    num += 1;
             }
             else
-                Data = decryptDataFromFile(fileByteArray, Length, ref fileLociton);
-
-            return new Tuple<byte[], string>(Data, type);
+                if (num % 2 == 1)
+                num -= 1;
         }
-
-        private byte[] decryptDataFromFile(byte[] fileByteArray, int length, ref int fileLociton)
+        private static bool getChangeColor(int num)
         {
-            BitArray Data = new BitArray(8);
-            byte[] DataByte = new byte[length];
-            for (int i = 0; i < length*8; i++, fileLociton++)
-            {
-                if (i % 8 == 0 && i != 0)
-                    DataByte[(i / 8) - 1] = ConvertToByte(Data);
-                Data[i % 8] = GetChangedBit(fileByteArray[fileLociton]);
-
-            }
-
-            return DataByte;
+            if (num % 2 == 0)
+                return false;
+            else
+                return true;
         }
-
-        
-        public override string getStringFromData(byte[] Data, int Length)
+        private static void getsBitsFromImg(ref BitArray helperToGetData, Color color)
         {
-            string str = "";
-            BitArray[] DataIn32Bits = new BitArray[Length / 32];
-            byte[] arr = new byte[4];
-            for (int i = 0, j = 0; i < (Length / 8); i += 4, j++)
-            {
-                arr[3] = Data[i + 3];
-                arr[2] = Data[i + 2];
-                arr[1] = Data[i + 1];
-                arr[0] = Data[i];
-                DataIn32Bits[j] = new BitArray(arr);
-            }
-
-            int[] convertHelper = new int[1];
-
-            foreach (var item in DataIn32Bits)
-            {
-                item.CopyTo(convertHelper, 0);
-                str += (char)convertHelper[0];
-            }
-            str += "\n";
-            return str;
+            helperToGetData[0] = getChangeColor(color.A);
+            helperToGetData[1] = getChangeColor(color.R);
+            helperToGetData[2] = getChangeColor(color.B);
+            helperToGetData[3] = getChangeColor(color.G);
         }
-
-        private byte[] decryptstringFromFile(byte[] fileByteArray, int length, ref int fileLociton)
+        private byte[] getDataFromBitArray(BitArray msgInBits)
         {
-
-            BitArray Data = new BitArray(8);
-            byte[] DataByte = new byte[length/8];
-            for (int i=0; i < length; i++,fileLociton++)
+            int lengthInByte = msgInBits.Length / 8;
+            byte[] data = new byte[lengthInByte];
+            BitArray convertHelper = new BitArray(8);
+            for (int i = 0; i < lengthInByte; ++i)
             {
-                if (i % 8 == 0 && i!=0)
-                    DataByte[(i / 8)-1] = ConvertToByte(Data);
-                Data[i%8] = GetChangedBit(fileByteArray[fileLociton]); 
-                
+                ConvertTo8Bit(msgInBits, ref convertHelper, i);
+                data[i] = ConvertToByte(convertHelper);
             }
-
-            return DataByte;
+            return data;
         }
 
-        byte ConvertToByte(BitArray bits)
+
+        private static void ReversTransperntImg(ref Bitmap bitmap)
+        {
+            int h = bitmap.Height, w = bitmap.Width;
+            for (int i = 0; i < h; i++)
+            {
+                for (int j = 0; j < w; j++)
+                {
+                    Color c = bitmap.GetPixel(j, i);
+                    if (c.A == 0)
+                        bitmap.SetPixel(j, i, Color.FromArgb(255, c));
+                }
+            }
+        }
+        public byte ConvertToByte(BitArray bits)
         {
             if (bits.Count != 8)
             {
                 throw new ArgumentException("bits");
-            }
-            for (int i = 0; i < 4; ++i)
-            {
-                bool temp = bits[i];
-                bits[i] = bits[7 - i];
-                bits[7 - i] = temp;
             }
             byte[] bytes = new byte[1];
             bits.CopyTo(bytes, 0);
             return bytes[0];
         }
 
-
-        private string decryptTypeDataFromFile(byte[] fileByteArray, ref int fileLociton)
-        {
-            bool[] typeData = { true, true, true, true };
-            for (int i = 0; i < 4; ++i, fileLociton++)
-            {
-                typeData[i] = GetChangedBit(fileByteArray[fileLociton]);
-            }
-
-            return getTypeData(typeData);
-
-        }
-
-        private int decryptLengthFromFile(byte[] fileByteArray,ref int fileLociton)
-        {
-            BitArray LengthOfDataInBits = new BitArray(24);
-            //get the Length of the data
-            for (int i = 0; fileLociton < startFileByte + 24; ++fileLociton, ++i)
-            {
-                LengthOfDataInBits[i] = GetChangedBit(fileByteArray[fileLociton]);
-            }
-            int[] convertHelper = new int[1];
-            LengthOfDataInBits.CopyTo(convertHelper, 0);
-            return convertHelper[0];
-        }
-
-        public override byte[] encryptInfoInFile(byte[] fileByteArray, string message)
-        {
-
-            //The function will change the 8-32 first byts to store the Length of the message
-            //Then 4 bit to detect that it is a string message 
-            //and then put all the information bits into the file.
-
-
-
-            //Length of file in the encrypt file
-
-            // messge can be till 16777216 bits
-            // 2097152 Byte, 2048 mb ~ 2Gb
-
-            BitArray lengthOfMessage = new BitArray(new int[] { message.Length*32 }); // the Length of the message in bitArray
-         //   if (lengthOfMessage.Length > 24)
-           //     throw new Exception("Message too big");
-
-            int fileLociton = startFileByte; //after all the Haders
-
-            for (int j = 0; fileLociton < startFileByte+24; ++fileLociton, j++)
-                fileByteArray[fileLociton] = changeByte(fileByteArray[fileLociton], lengthOfMessage[j]);
-
-
-            bool[] fileType = findFileType("string");
-
-            for (int i = 0; i < 4; ++i, ++fileLociton)
-                fileByteArray[fileLociton] = changeByte(fileByteArray[fileLociton], fileType[i]);
-
-
-            foreach (char c in message)
-            {
-                BitArray char1 = new BitArray(new int[] { System.Convert.ToInt32(c) });
-                
-                foreach (var a in char1)
-                {
-                    fileByteArray[fileLociton] = changeByte(fileByteArray[fileLociton], (bool)a);
-                    fileLociton++;
-
-                }
-
-            }
-            return fileByteArray;
-        }
-
-        public override byte[] encryptInfoInFile(byte[] fileByteArray, byte[] message, string type)
-        {
-            //The function will change the 8-32 first byts to store the Length of the message
-            //Then 4 bit to detect that it is a string message 
-            //and then put all the information bits into the file.
-
-
-
-            //Length of file in the encrypt file
-
-            // messge can be till 16777216 bits
-            // 2097152 Byte, 2048 mb ~ 2Gb
-            BitArray lengthOfMessage = new BitArray(new int[] { message.Length }); // the Length of the message in bitArray
-            //if (lengthOfMessage.Length > 24)
-              //  throw new Exception("Message too big");
-
-            int fileLociton = startFileByte; //after all the Haders
-
-            for (int j=0; fileLociton < startFileByte+24; ++fileLociton,j++)
-                fileByteArray[fileLociton] = changeByte(fileByteArray[fileLociton], lengthOfMessage[j]);
-            
-
-            bool[] fileType = findFileType(type);
-
-            for(int i =0;i<4;++i, ++fileLociton)
-                fileByteArray[fileLociton] = changeByte(fileByteArray[fileLociton], fileType[i]);
-
-
-            foreach (byte b in message)
-            {
-                BitArray Byte = ByteToBitFormat8(b);
-                for (int i =0;i<8;++i)
-                {
-
-                    fileByteArray[fileLociton] = changeByte(fileByteArray[fileLociton], Byte[i]);
-                    fileLociton++;
-                }
-            }
-            return fileByteArray;
-        }
-
-        private BitArray ByteToBitFormat8(byte b)
-        {
-            BitArray Byte = new BitArray(8);
-            int num = int.Parse(b.ToString());
-            int counter = 128;
-            
-            for (int i = 0; i < 8 ; i++)
-            {
-                if (num >= counter)
-                {
-                    Byte[i] = true;
-                    num -= counter;
-                }
-                else
-                    Byte[i] = false;
-
-                counter /= 2;
-
-            }
-            return Byte;
-        }
-
-        public override string maxMessageSize(byte[] arr)
-        {
-            int numBits = arr.Length / 8;
-            numBits -=(startFileByte + 24 + 4);
-            return (numBits ).ToString()+" Byte";
-        }
-        public override string ToString()
-        {
-            return "file.jpg/jpag";
-        }
     }
 }

@@ -26,7 +26,7 @@ namespace display
         string filename;
         public MainWindow()
         {
-            file = new image();
+           // file = new image();
             InitializeComponent();
         }
 
