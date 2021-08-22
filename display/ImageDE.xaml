@@ -1,0 +1,27 @@
+﻿<Window x:Class="display.ImageDE"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:display"
+        mc:Ignorable="d"
+        Title="ImageDE" Height="450" Width="800">
+    <Grid>
+
+        <TextBlock x:Name="TextBlockAfter1" HorizontalAlignment="Left" Visibility="Hidden" TextWrapping="Wrap" Text="After:" VerticalAlignment="Top" Margin="516,30,0,0" FontSize="20"/>
+        <TextBlock x:Name="TextBlockBefor" HorizontalAlignment="Left" Visibility="Hidden"  TextWrapping="Wrap" Text="Before:" VerticalAlignment="Top" Margin="75,33,0,0" FontSize="20"/>
+        <Image x:Name="Image1"  HorizontalAlignment="Left" Height="269" Visibility="Hidden" VerticalAlignment="Top" Width="289" Margin="479,75,0,0"/>
+        <Image x:Name="Image2"  HorizontalAlignment="Left" Height="269" Visibility="Hidden" VerticalAlignment="Top" Width="288" Margin="87,75,0,0" RenderTransformOrigin="0.491,0.495"/>
+
+        <Button x:Name="choosMsgFileBtn" Visibility="Hidden" FontSize="20"   Content="choos file" HorizontalAlignment="Left" Margin="300,55,0,0" VerticalAlignment="Top" Width="184" Click="choosFileBtn_Click" Height="62"/>
+        <Button x:Name="choosFileBtn" FontSize="20" Content="choos file" HorizontalAlignment="Left" Margin="300,55,0,0" VerticalAlignment="Top" Width="184" Click="choosFileBtn_Click" Height="62"/>
+        <TextBlock  x:Name="FileNameTextBlock"  FontSize="20" HorizontalAlignment="Left" Height="41" Margin="153,94,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="629"/>
+        <Button  x:Name="encryptFileBtn" Visibility="Hidden" FontSize="20"  Content="encrypt message into file" HorizontalAlignment="Left" VerticalAlignment="Top" Width="250" Margin="58,155,0,0" Height="78" Click="encryptFileBtn_Click"/>
+        <Button x:Name="decryptFileBtn" Visibility="Hidden" FontSize="20"  Content="decrypt message From File" HorizontalAlignment="Left" VerticalAlignment="Top" Width="271" Margin="479,155,0,0" Height="78" Click="decryptFileBtn_Click"/>
+        <TextBlock  x:Name="msgTextBlock" Visibility="Hidden" FontSize="20"  HorizontalAlignment="Left" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Margin="142,35,0,0" Height="110" Width="650"/>
+        <Button  x:Name="saveButton" FontSize="20" Visibility="Hidden" Content="save" HorizontalAlignment="Left" Margin="621,364,0,0" VerticalAlignment="Top" Width="161" Height="45" Click="saveButton_Click"/>
+        <Button  x:Name="cencelButton" FontSize="20" Visibility="Hidden" Content="cencel" HorizontalAlignment="Left" Margin="10,359,0,0" VerticalAlignment="Top" Width="148" Height="50" Click="cencelButton_Click"/>
+        <Button x:Name="changeFileBtn" Visibility="Hidden" Content="Change file" FontSize="20" HorizontalAlignment="Left" Margin="0,35,0,0" VerticalAlignment="Top" Width="127" Height="100" Click="changeFileBtn_Click"/>
+
+    </Grid>
+</Window>

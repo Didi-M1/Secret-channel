@@ -21,138 +21,97 @@ namespace FilesType
      *
      *Step four - Do everything revers and decrypt the message from our bitMap. 
      */
-
-    public class image
+    
+    public class Image : Files
     {
-        int LengthMsg = 32;
-        int sizeOfType = 8;
-        public Bitmap encryptImage(string filename, Byte[] info,string type)
+       
+        #region main function
+        /// <summary>
+        /// encryptImage - main func to encrypt the msg.
+        /// takes the filePath of the image. Byte[] the msg Bytes and the type of the msg.
+        /// return bitMap with the msg data ot it with minor changes. 
+        /// </summary>
+        /// <param name="filePath">the image filePath</param>
+        /// <param name="info">the msg in Byte array</param>
+        /// <param name="type">the type of the msg</param>
+        /// <returns>returns the image as a bitmap with the msg on it</returns>
+        public Bitmap encryptImageFile(string filePath, Byte[] info,string type)
         {
-            Bitmap bitmap = new Bitmap(filename);
+            //takes the image and for every nedded pixsel change the lsb of the ARGB according to the Bytep[] info.
+
+            int i = 0 ,j = 0;
+            Bitmap bitmap = new Bitmap(filePath);
+
+            //adds an alfha chanel to the image
             bitmap.MakeTransparent();
             ReversTransperntImg(ref bitmap);
-            int i = 0;
-            int j = 0;
+
 
 
             BitArray bitsInfo = new BitArray(info);
-
             BitArray lengthOfMessage = new BitArray(new int[] { info.Length }); // the Length of the message in bitArray
-
             BitArray typeBitArray = putTypeOFMsgInBit(type); // the type of the message in bitArray
-             
-
-
 
             int length = bitsInfo.Length;
 
 
-            ChangeImageFromInfo(ref i, ref j, 0, ref bitmap, lengthOfMessage, LengthMsg);
-
-            ChangeImageFromInfo(ref i, ref j, 0, ref bitmap, typeBitArray, sizeOfType);
-
-            ChangeImageFromInfo(ref i, ref j, 0, ref bitmap, bitsInfo, length);
+            ChangeImageFromInfo(ref i, ref j, ref bitmap, lengthOfMessage, LengthMsg);
+            ChangeImageFromInfo(ref i, ref j, ref bitmap, typeBitArray, sizeOfType);
+            ChangeImageFromInfo(ref i, ref j, ref bitmap, bitsInfo, length);
 
             return bitmap;
         }
 
-        private BitArray putTypeOFMsgInBit(string type)
+        /// <summary>
+        /// gets the filePath of the image and return the data that in it also the type of the data. 
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns>the data in Byte[] that was in the image also the type of the data</returns>
+        public override Tuple<byte[], string> decryptInfoFromFile(string filePath)
         {
-            bool[] arr;
-            if (type == "png")
-                arr = new bool[] { true, true, true, true, true, true, true, true };
-            else if (type == "txt")
-                arr = new bool[] { true, true, true, true, true, true, true, false };
-            else
-                arr = new bool[] { false, false, false, false, false, false, false, false };
-            return convertBoolToBitArray(arr);
-        }
-
-        public Tuple<byte[], string> decryptInfoFromFile(string filePath)
-        {
+            //takes an image and exstret the length,type and the message and return it. 
             Bitmap img = new Bitmap(filePath);
-
             int i = 0, j = 0;
             int posionInImg = 0;
 
-            BitArray LengthOfMsgInBits = getChangesBitFromImg(img, ref i, ref j,ref posionInImg, LengthMsg);
-            int[] convertHelper = new int[1];
-            LengthOfMsgInBits.CopyTo(convertHelper, 0);
-            int exsratLengthMsg = convertHelper[0] * 8;
 
+
+            BitArray LengthOfMsgInBits = getChangesBitFromImg(img, ref i, ref j, ref posionInImg, LengthMsg);
+            int exsratLengthMsg = convertBitArrayLengthToInt(LengthOfMsgInBits);
+            if (exsratLengthMsg <= 0)
+                throw new ExceptionErrorInFileDycripting("length dycripting want wrong");
 
             BitArray typeInBits = getChangesBitFromImg(img, ref i, ref j, ref posionInImg, sizeOfType);
             bool[] boolArrType = convertBitArrayToBool(typeInBits);
             string type = getType(boolArrType);
 
-
-
             BitArray MsgInBits = getChangesBitFromImg(img, ref i, ref j, ref posionInImg, exsratLengthMsg);
-            byte[] dataInByteArr = getDataFromBitArray(MsgInBits);
-
+            byte[] dataInByteArr = convertDataInBitArrayToByteArray(MsgInBits);
 
 
             return new Tuple<byte[], string>(dataInByteArr, type);
 
         }
 
-        public string maxMessageSize(string filename)
-        {
-            return maxMessageSizeNumber(filename).ToString() + "B";
-        }
+        
 
-        public int maxMessageSizeNumber(string filename)
-        {
-            Bitmap img = new Bitmap(filename);
-
-            int w = img.Width;
-            int h = img.Height;
-             return ((w * h - 10) * 4);
-        }
-
-        private bool[] convertBitArrayToBool(BitArray typeInBits)
-        {
-            bool[] arr = new bool[8];
-            for (int i = 0; i < 8; ++i)
-                arr[i] = typeInBits[i];
-            return arr;
-        }
-        private BitArray convertBoolToBitArray(bool[] typeInbool)
-        {
-            BitArray typeInBits = new BitArray(sizeOfType);
-            for (int i = 0; i < 8; ++i)
-                typeInBits[i] = typeInbool[i];
-            return typeInBits;
-        }
-
-        private string getType(bool[] typeInBits)
-        {
-
-            string str = "";
-            if (Enumerable.SequenceEqual(typeInBits, new bool[] { true, true, true, true, true, true, true, true }))
-                str = "png";
-            else if (Enumerable.SequenceEqual(typeInBits, new bool[] { true, true, true, true, true, true, true, false }))
-                str = "txt";
-            else if ((Enumerable.SequenceEqual(typeInBits, new bool[] { false, false, false, false, false, false, false, false })))
-                throw new Exception("File Type Not Suported");
-            
-            return str;        }
-
-        private BitArray getChangesBitFromImg(Bitmap img,ref int i,ref int j, ref int posionInImg, int lengthMsg)
+        private BitArray getChangesBitFromImg(Bitmap img, ref int i, ref int j, ref int posionInImg, int lengthMsg)
         {
             BitArray helperToGetData = new BitArray(4);
             BitArray MsgInBits = new BitArray(lengthMsg);
             int Width = img.Width, Height = img.Height;
             int previusOfPosionInImg = posionInImg;
+
+            //for every [ixsel in the Length takes the lsb and stored and return them into bitArray
             for (; i < Width; ++i)
             {
                 for (; j < Height; ++j)
                 {
-                    if (previusOfPosionInImg+ lengthMsg <= posionInImg)
+                    if (previusOfPosionInImg + lengthMsg <= posionInImg)
                         break;
                     Color color = img.GetPixel(i, j);
                     getsBitsFromImg(ref helperToGetData, color);
-                    putBitsInArr(ref MsgInBits, helperToGetData, j*4 + (i * Height*4)- previusOfPosionInImg);
+                    putBitsInArr(ref MsgInBits, helperToGetData, j * 4 + (i * Height * 4) - previusOfPosionInImg);
                     posionInImg += 4;
 
                 }
@@ -163,57 +122,59 @@ namespace FilesType
             }
             return MsgInBits;
         }
+        private void ChangeImageFromInfo(ref int iWidth, ref int jHeight, ref Bitmap bitmap, BitArray lengthOfMessage, int LengthOfData)
+        {
 
-        private static void ConvertTo8Bit(BitArray msgInBits, ref BitArray convertHelper, int i)
-        {
-            for(int j =0;j<8;++j)
-                convertHelper[j] = msgInBits[(i * 8) + j];
-        }
-        private static void putBitsInArr(ref BitArray lengthOfMsgInBits, BitArray helperToGetData, int i)
-        {
-            for(int j=0;j<4;++j)
-                lengthOfMsgInBits[(i)+j] = helperToGetData[j];
-        }
-        private static void getsBitsFromINfo(ref BitArray helpBitArrayToChange, BitArray bitsInfo, int posionInInfo)
-        {
-            for (int j = 0; j < 4; ++j)
-            {
-                helpBitArrayToChange[j] = bitsInfo[posionInInfo + j];
-            }
-        }
-
-
-        private static void ChangeImageFromInfo(ref int i, ref int j, int posionInInfo, ref Bitmap bitmap, BitArray lengthOfMessage, int LengthOfData)
-        {
+            int posionInInfo = 0;
             BitArray HelpBitArrayToChange = new BitArray(4);
             int Width = bitmap.Width;
             int Height = bitmap.Height;
 
-            for (; i < Width; ++i)
+            //for every pixsel needed change the lsb of the ARGB and save it to the new bitmap
+            for (; iWidth < Width; ++iWidth)
             {
-                for (; j < Height; ++j)
+                for (; jHeight < Height; ++jHeight)
                 {
                     if (LengthOfData <= posionInInfo)
                         break;
-                    getsBitsFromINfo(ref HelpBitArrayToChange, lengthOfMessage, posionInInfo);
-
-                    Color color = bitmap.GetPixel(i, j);
+                    getsBitsFromInfo(ref HelpBitArrayToChange, lengthOfMessage, posionInInfo);
+                    Color color = bitmap.GetPixel(iWidth, jHeight);
                     color = ChangeArgbToInfo(color, HelpBitArrayToChange);
-                    bitmap.SetPixel(i, j, color);
-                    
-
+                    bitmap.SetPixel(iWidth, jHeight, color);
                     posionInInfo += 4;
                 }
                 if (LengthOfData <= posionInInfo)
                     break;
                 else
-                    j = 0;
+                    jHeight = 0;
             }
         }
+        #endregion
 
-
-        private static Color ChangeArgbToInfo(Color color, BitArray bitsArrayInfo)
+        #region sizes
+        public override string maxMessageSize(string filename)
         {
+            //return the max capacity that the image can save in string
+            int max = maxMessageSizeNumber(filename);
+            if (max > 1000000)//MB
+                return (float.Parse(max.ToString()) / 1000000).ToString() + "MB";
+            return max.ToString() + "B";
+        }
+        public override int maxMessageSizeNumber(string filename)
+        {
+            //return the max bytes capacity that the image can save in integer
+            Bitmap img = new Bitmap(filename);
+
+            int w = img.Width;
+            int h = img.Height;
+            return ((w * h - 10) * 4);
+        }
+        #endregion
+
+        #region converts and helpul function
+        private Color ChangeArgbToInfo(Color color, BitArray bitsArrayInfo)
+        {
+            //changes the pixsel color according to the info(bitsArrayInfo)
             int alfa = color.A;
             int red = color.R;
             int blue = color.B;
@@ -225,9 +186,9 @@ namespace FilesType
 
             return Color.FromArgb(alfa, red, green, blue);
         }
-
-        private static void ChangeColor(ref int num, bool v)
+        private void ChangeColor(ref int num, bool v)
         {
+            //changes the lsb of the argb Byte to our info
             if (v)
             {
                 if (num % 2 == 0)
@@ -237,36 +198,25 @@ namespace FilesType
                 if (num % 2 == 1)
                 num -= 1;
         }
-        private static bool getChangeColor(int num)
+        private bool getChangeColor(int num)
         {
+            //get the modified lsb from the ARGB 
             if (num % 2 == 0)
                 return false;
             else
                 return true;
         }
-        private static void getsBitsFromImg(ref BitArray helperToGetData, Color color)
+        private void getsBitsFromImg(ref BitArray helperToGetData, Color color)
         {
+            //gets the bits from the ARGB to bitarray
             helperToGetData[0] = getChangeColor(color.A);
             helperToGetData[1] = getChangeColor(color.R);
             helperToGetData[2] = getChangeColor(color.B);
             helperToGetData[3] = getChangeColor(color.G);
         }
-        private byte[] getDataFromBitArray(BitArray msgInBits)
+        private void ReversTransperntImg(ref Bitmap bitmap)
         {
-            int lengthInByte = msgInBits.Length / 8;
-            byte[] data = new byte[lengthInByte];
-            BitArray convertHelper = new BitArray(8);
-            for (int i = 0; i < lengthInByte; ++i)
-            {
-                ConvertTo8Bit(msgInBits, ref convertHelper, i);
-                data[i] = ConvertToByte(convertHelper);
-            }
-            return data;
-        }
-
-
-        private static void ReversTransperntImg(ref Bitmap bitmap)
-        {
+            //after we add the Alfha channel we need to undo the changes
             int h = bitmap.Height, w = bitmap.Width;
             for (int i = 0; i < h; i++)
             {
@@ -278,16 +228,6 @@ namespace FilesType
                 }
             }
         }
-        public byte ConvertToByte(BitArray bits)
-        {
-            if (bits.Count != 8)
-            {
-                throw new ArgumentException("bits");
-            }
-            byte[] bytes = new byte[1];
-            bits.CopyTo(bytes, 0);
-            return bytes[0];
-        }
-
+        #endregion
     }
 }
