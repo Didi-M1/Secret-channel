@@ -29,6 +29,7 @@ namespace display
         FilesType.Image file;
         string filename;
         bool firstTime = true;
+
         public ImageDE()
         {
             file = new FilesType.Image();
@@ -101,6 +102,7 @@ namespace display
             firstTime = false;
             try
             { 
+               
             Tuple<byte[], string> infoFromFile = file.decryptInfoFromFile(filename);
             MessageBox.Show("success!");
             saveFile(infoFromFile);
@@ -136,10 +138,57 @@ namespace display
 
 
             string[] arr = Msgfilename.Split('.');
-            imgMsg = file.encryptImageFile(filename, msg, arr[arr.Length - 1]);
+            try
+            {
+                imgMsg = file.encryptImageFile(filename, msg, arr[arr.Length - 1]);
 
 
-            HideAndVisibleAfterEncrypt();
+                HideAndVisibleAfterEncrypt();
+            }
+            catch(Exception )
+            {
+                MessageBox.Show("Image file corrupt, Please try another.", "Error");
+            }
+
+        }
+
+        private void saveButton_Click(object sender, RoutedEventArgs e)
+        {
+            saveFile(imgMsg);
+            hideSaveAndCeneclBtn();
+        }
+
+        private void cencelButton_Click(object sender, RoutedEventArgs e)
+        {
+            hideSaveAndCeneclBtn();
+        }
+
+        private void changeFileBtn_Click(object sender, RoutedEventArgs e)
+        {
+            choosFileBtn_Click(sender, e);
+            firstTime = true;
+        }
+
+        #endregion
+
+        #region converts and helpul function
+
+        private void hideSaveAndCeneclBtn()
+        {
+
+            Image1.Visibility = Visibility.Hidden;
+            Image2.Visibility = Visibility.Hidden;
+            TextBlockAfter1.Visibility = Visibility.Hidden;
+            TextBlockBefor.Visibility = Visibility.Hidden;
+            cencelButton.Visibility = Visibility.Hidden;
+            saveButton.Visibility = Visibility.Hidden;
+            TextBlockBefor.Text = "Befor:";
+            TextBlockAfter1.Text = "After:";
+
+            encryptFileBtn.Visibility = Visibility.Visible;
+            decryptFileBtn.Visibility = Visibility.Visible;
+            FileNameTextBlock.Visibility = Visibility.Visible;
+            changeFileBtn.Visibility = Visibility.Visible;
 
 
         }
@@ -174,41 +223,6 @@ namespace display
                 TextBlockAfter1.Text += " -size:" + afterSize.ToString() + "B";
         }
 
-        private void saveButton_Click(object sender, RoutedEventArgs e)
-        {
-            saveFile(imgMsg);
-            hideSaveAndCeneclBtn();
-        }
-
-        private void cencelButton_Click(object sender, RoutedEventArgs e)
-        {
-            hideSaveAndCeneclBtn();
-        }
-
-        #endregion
-
-        #region converts and helpul function
-
-        private void hideSaveAndCeneclBtn()
-        {
-
-            Image1.Visibility = Visibility.Hidden;
-            Image2.Visibility = Visibility.Hidden;
-            TextBlockAfter1.Visibility = Visibility.Hidden;
-            TextBlockBefor.Visibility = Visibility.Hidden;
-            cencelButton.Visibility = Visibility.Hidden;
-            saveButton.Visibility = Visibility.Hidden;
-            TextBlockBefor.Text = "Befor:";
-            TextBlockAfter1.Text = "After:";
-
-            encryptFileBtn.Visibility = Visibility.Visible;
-            decryptFileBtn.Visibility = Visibility.Visible;
-            FileNameTextBlock.Visibility = Visibility.Visible;
-            changeFileBtn.Visibility = Visibility.Visible;
-
-
-        }
-
         private BitmapImage ConvertToImageSorce(Bitmap src)
         {
             MemoryStream ms = new MemoryStream();
@@ -222,11 +236,6 @@ namespace display
         }
         #endregion
 
-        private void changeFileBtn_Click(object sender, RoutedEventArgs e)
-        {
-            choosFileBtn_Click(sender, e);
-            firstTime = true;
-        }
     }
 }
 
