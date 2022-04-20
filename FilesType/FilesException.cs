@@ -7,19 +7,19 @@ using System.Threading.Tasks;
 namespace FilesType
 {
     [Serializable]
-    public class ExceptionErrorInFileDycripting : Exception
+    public class ExceptionErrorInFileDecrypting : Exception
     {
         public string ID;
-        public ExceptionErrorInFileDycripting(string id) : base() => ID = id;
-        public ExceptionErrorInFileDycripting(string id,string msg) : base(msg) => ID = id;
-        public override string ToString() => base.ToString() + $"something went wrong in Dycripting {ID}";
+        public ExceptionErrorInFileDecrypting(string id) : base() => ID = id;
+        public ExceptionErrorInFileDecrypting(string id,string msg) : base(msg) => ID = id;
+        public override string ToString() => base.ToString() + $"something went wrong in decrypting {ID}";
     }
     [Serializable]
-    public class ExceptionErrorInTypeDycripting : Exception
+    public class ExceptionErrorInTypeDecrypting : Exception
     {
         public string ID;
-        public ExceptionErrorInTypeDycripting(string id) : base() => ID = id;
-        public ExceptionErrorInTypeDycripting(string id, string msg) : base(msg) => ID = id;
-        public override string ToString() => base.ToString() + $"something went wrong in type Dycripting {ID}";
+        public ExceptionErrorInTypeDecrypting(string id) : base() => ID = id;
+        public ExceptionErrorInTypeDecrypting(string id, string msg) : base(msg) => ID = id;
+        public override string ToString() => base.ToString() + $"something went wrong in type decrypting {ID}";
     }
 }

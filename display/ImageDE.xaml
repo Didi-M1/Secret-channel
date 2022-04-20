@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:display"
         mc:Ignorable="d"
-        Icon="C:\Users\Didi\source\repos\BitsArray\display\bin\Debug\Hacker.png"
+        Icon="hacker.png"
         Title="ImageDE" Height="450" Width="800">
     <Grid>
 

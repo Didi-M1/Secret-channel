@@ -28,8 +28,7 @@ namespace display
         public MainWindow()
         {
             InitializeComponent();
-
-            MessageBox.Show("This software designed to \"Hide\" message file in a larger file. for now the software only supports images file(only .png).", "Administrative notice", MessageBoxButton.OK);
+            MessageBox.Show("This software designed to \"Hide\" message file in a larger file. for now the software only supports images file(only .png and .jpg).", "Administrative notice", MessageBoxButton.OK);
             
 
         }

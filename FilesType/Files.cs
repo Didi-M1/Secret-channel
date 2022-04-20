@@ -15,19 +15,8 @@ namespace FilesType
 
         #region main functions
 
-        /*        /// <summary>
-                /// encryptInfoInFile function - taks the file as Byte array, also take the message as Byte array
-                /// and encrypt the message into copy file and return the copy after the change.
-                /// </summary>
-                /// <param name="arr">Main file</param>
-                /// <param name="message">our message as Byte array</param>
-                /// <param name="type">the message type</param>
-                /// <returns>return the file after the message in it</returns>
-        //        public abstract Byte[] encryptFile(string filePath, Byte[] message,string type);
-        */
-
         /// <summary>
-        /// decryptInfoFromFile function - taks the file as Byte array, and decrypt the info out of him and 
+        /// decryptInfoFromFile function - takes the file as Byte array, and decrypt the info out of him and 
         /// return the message as Byte Array
         /// </summary>
         /// <param name="arr">our File</param>
@@ -167,16 +156,16 @@ namespace FilesType
             else if (Enumerable.SequenceEqual(typeInBits, new bool[] { true, true, true, false, true, true, true, false }))
                 str = "pdf";
             else if ((Enumerable.SequenceEqual(typeInBits, new bool[] { false, false, false, false, false, false, false, false })))
-                throw new ExceptionErrorInTypeDycripting("File Type Not Suported yet");
+                throw new ExceptionErrorInTypeDecrypting("File type not supported yet");
             else
-                throw new ExceptionErrorInTypeDycripting("Something went wrong. are you shure this is an encryptesFile?");
+                throw new ExceptionErrorInTypeDecrypting("Something went wrong. are you sure this is an encryptesFile?");
 
 
             return str;
         }
         #endregion
 
-        #region converts and helpul function
+        #region converts and helpful function
 
         protected byte[] convertDataInBitArrayToByteArray(BitArray msgInBits)
         {
@@ -193,7 +182,7 @@ namespace FilesType
         }
         protected void putBitsInArr(ref BitArray lengthOfMsgInBits, BitArray helperToGetData, int i)
         {
-            //takes the bits frim helperToGetData and put them in lengthOfMsgInBits
+            //takes the bits from helperToGetData and put them in lengthOfMsgInBits
             for (int j = 0; j < 4; ++j)
                 lengthOfMsgInBits[(i) + j] = helperToGetData[j];
         }
@@ -210,7 +199,7 @@ namespace FilesType
             //convert BitArray to byte
             if (bits.Count != 8)
             {
-                throw new ArgumentException("BitArray size isnt 8");
+                throw new ArgumentException("BitArray size isn't 8");
             }
             byte[] bytes = new byte[1];
             bits.CopyTo(bytes, 0);

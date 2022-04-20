@@ -17,7 +17,7 @@ namespace FilesType
      *
      *Step two - Make sure there is an alpha channel to the img with the makeTransparnt function.
      *
-     *Step three - Change the lsb of the ARGB per pixel and save information 
+     *Step three - Change the LSB of the ARGB per pixel and save information 
      *from our message in the following order - size (32b), file type (8b) and then the message.
      *
      *Step four - Do everything revers and decrypt the message from our bitMap. 
@@ -36,7 +36,7 @@ namespace FilesType
         /// <summary>
         /// encryptImage - main func to encrypt the msg.
         /// takes the filePath of the image. Byte[] the msg Bytes and the type of the msg.
-        /// return bitMap with the msg data ot it with minor changes. 
+        /// return bitMap with the msg data on it with minor changes. 
         /// </summary>
         /// <param name="filePath">the image filePath</param>
         /// <param name="info">the msg in Byte array</param>
@@ -44,12 +44,12 @@ namespace FilesType
         /// <returns>returns the image as a bitmap with the msg on it</returns>
         public Bitmap encryptImageFile(string filePath, Byte[] info, string type)
         {
-            //takes the image and for every nedded pixsel change the lsb of the ARGB according to the Bytep[] info.
+            //takes the image and for every needed pixels change the LSB of the ARGB according to the Byte[] info.
 
             int i = 0, j = 0;
             Bitmap bitmap = new Bitmap(filePath);
 
-            //adds an alfha chanel to the image
+            //adds an alpha channel to the image
             bitmap.MakeTransparent();
             ReversTransperntImg(ref bitmap);
 
@@ -76,7 +76,7 @@ namespace FilesType
         /// <returns>the data in Byte[] that was in the image also the type of the data</returns>
         public override Tuple<byte[], string> decryptInfoFromFile(string filePath)
         {
-            //takes an image and exstret the length,type and the message and return it. 
+            //takes an image and extract the length,type and the message and return it. 
             Bitmap img = new Bitmap(filePath);
             int i = 0, j = 0;
             int posionInImg = 0;
@@ -86,7 +86,7 @@ namespace FilesType
             BitArray LengthOfMsgInBits = getChangesBitFromImg(img, ref i, ref j, ref posionInImg, LengthMsg);
             int exsratLengthMsg = convertBitArrayLengthToInt(LengthOfMsgInBits);
             if (exsratLengthMsg <= 0)
-                throw new ExceptionErrorInFileDycripting("length dycripting want wrong");
+                throw new ExceptionErrorInFileDecrypting("length decrypting want wrong");
 
             BitArray typeInBits = getChangesBitFromImg(img, ref i, ref j, ref posionInImg, sizeOfType);
             bool[] boolArrType = convertBitArrayToBool(typeInBits);
@@ -109,7 +109,7 @@ namespace FilesType
             int Width = img.Width, Height = img.Height;
             int previusOfPosionInImg = posionInImg;
 
-            //for every [ixsel in the Length takes the lsb and stored and return them into bitArray
+            //for every pixels in the Length takes the LSB and stored and return them into bitArray
             for (; i < Width; ++i)
             {
                 for (; j < Height; ++j)
@@ -137,7 +137,7 @@ namespace FilesType
             int Width = bitmap.Width;
             int Height = bitmap.Height;
 
-            //for every pixsel needed change the lsb of the ARGB and save it to the new bitmap
+            //for every pixels needed change the LSB of the ARGB and save it to the new bitmap
             for (; iWidth < Width; ++iWidth)
             {
                 for (; jHeight < Height; ++jHeight)
@@ -176,14 +176,14 @@ namespace FilesType
 
             int w = img.Width;
             int h = img.Height;
-            return ((w * h - 10) /2); //for every pixsel we can store 4 bit. -10 beause the length and the type
+            return ((w * h - 10) /2); //for every pixels we can store 4 bit. -10 because the length and the type
         }
         #endregion
 
-        #region converts and helpul function
+        #region converts and helpful function
         private Color ChangeArgbToInfo(Color color, BitArray bitsArrayInfo)
         {
-            //changes the pixsel color according to the info(bitsArrayInfo)
+            //changes the pixels color according to the info(bitsArrayInfo)
             int alfa = color.A;
             int red = color.R;
             int blue = color.B;
@@ -197,7 +197,7 @@ namespace FilesType
         }
         private void ChangeColor(ref int num, bool v)
         {
-            //changes the lsb of the argb Byte to our info
+            //changes the LSB of the ARGB Byte to our info
             if (v)
             {
                 if (num % 2 == 0)
@@ -209,7 +209,7 @@ namespace FilesType
         }
         private bool getChangeColor(int num)
         {
-            //get the modified lsb from the ARGB 
+            //get the modified LSB from the ARGB 
             if (num % 2 == 0)
                 return false;
             else
@@ -217,7 +217,7 @@ namespace FilesType
         }
         private void getsBitsFromImg(ref BitArray helperToGetData, Color color)
         {
-            //gets the bits from the ARGB to bitarray
+            //gets the bits from the ARGB to bit array
             helperToGetData[0] = getChangeColor(color.A);
             helperToGetData[1] = getChangeColor(color.R);
             helperToGetData[2] = getChangeColor(color.B);
@@ -225,7 +225,7 @@ namespace FilesType
         }
         private void ReversTransperntImg(ref Bitmap bitmap)
         {
-            //after we add the Alfha channel we need to undo the changes
+            //after we add the alpha channel we need to undo the changes
             int h = bitmap.Height, w = bitmap.Width;
             for (int i = 0; i < h; i++)
             {

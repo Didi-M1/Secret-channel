@@ -79,7 +79,7 @@ namespace display
         #region btns
         private void choosFileBtn_Click(object sender, RoutedEventArgs e)
         {
-            filename = OpenFile("PNG Files (*.png)|*.png", ".png");
+            filename = OpenFile("Image files (*.jpg, *.jpeg, .png) | *.jpg; *.jpeg; *.png");
 
 
             if (filename != null)
@@ -107,16 +107,16 @@ namespace display
             MessageBox.Show("success!");
             saveFile(infoFromFile);
             }
-            catch (ExceptionErrorInFileDycripting)
+            catch (ExceptionErrorInFileDecrypting)
             {
-                MessageBox.Show("Something went wrong, are you sure the file is really encrypted and not passed any compression(like sended in Whatsapp etc')?", "Error");
+                MessageBox.Show("Something went wrong, are you sure the file is really encrypted and not passed any compression(like sensed in WhatsApp etc')?", "Error");
             }
-            catch(ExceptionErrorInTypeDycripting ex)
+            catch(ExceptionErrorInTypeDecrypting ex)
             {
-                if(ex.Message== "File Type Not Suported yet")
+                if(ex.Message== "File Type Not supported yet")
                     MessageBox.Show("Something went wrong, Probably the encrypted file is not supported yet. ", "Error");
                 else
-                    MessageBox.Show("Something went wrong, are you sure the file is really encrypted and not passed any compression(like sended in Whatsapp etc')?", "Error");
+                    MessageBox.Show("Something went wrong, are you sure the file is really encrypted and not passed any compression(like sensed in WhatsApp  etc')?", "Error");
             }
         }
 
@@ -126,7 +126,7 @@ namespace display
                 choosFileBtn_Click(sender, e);
             firstTime = false;
 
-            MessageBox.Show("Be awar, this is the max size of the encrypt message   " + file.maxMessageSize(filename));
+            MessageBox.Show("The max size of the encrypt message   " + file.maxMessageSize(filename));
 
             string Msgfilename = OpenFile();
             Byte[] msg = System.IO.File.ReadAllBytes(Msgfilename);
@@ -171,7 +171,7 @@ namespace display
 
         #endregion
 
-        #region converts and helpul function
+        #region converts and helpful function
 
         private void hideSaveAndCeneclBtn()
         {
@@ -182,7 +182,7 @@ namespace display
             TextBlockBefor.Visibility = Visibility.Hidden;
             cencelButton.Visibility = Visibility.Hidden;
             saveButton.Visibility = Visibility.Hidden;
-            TextBlockBefor.Text = "Befor:";
+            TextBlockBefor.Text = "Before:";
             TextBlockAfter1.Text = "After:";
 
             encryptFileBtn.Visibility = Visibility.Visible;
